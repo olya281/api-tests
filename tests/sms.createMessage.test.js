@@ -5,6 +5,10 @@ const API_KEY = process.env.X_API_KEY;
 
 describe('sms.createMessage API', () => {
   test('успешно создаёт SMS при валидных данных', async () => {
+    if (!API_KEY) {
+      throw new Error('X_API_KEY env is not set');
+    }
+
     const payload = {
       to: '+447441921220',
       body: 'Hello from curl!',
@@ -19,10 +23,8 @@ describe('sms.createMessage API', () => {
       },
     });
 
-    // 1. HTTP-статус
     expect(response.status).toBe(200);
 
-    // 2. Проверяем структуру tRPC-ответа
     expect(response.data).toHaveProperty('result');
     expect(response.data.result).toHaveProperty('data');
     expect(response.data.result.data).toHaveProperty('success', true);
@@ -30,7 +32,6 @@ describe('sms.createMessage API', () => {
 
     const data = response.data.result.data.data;
 
-    // 3. Основные бизнес-поля
     expect(data).toMatchObject({
       to: payload.to,
       body: payload.body,
@@ -40,9 +41,9 @@ describe('sms.createMessage API', () => {
       clientMessageId: null,
     });
 
-    // 4. Технические поля
     expect(typeof data.id).toBe('number');
     expect(new Date(data.createdAt).toString()).not.toBe('Invalid Date');
     expect(new Date(data.updatedAt).toString()).not.toBe('Invalid Date');
   });
 });
+
